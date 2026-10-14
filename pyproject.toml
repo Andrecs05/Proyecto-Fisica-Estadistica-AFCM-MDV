@@ -1,0 +1,12 @@
+[project]
+name = "fisica-estadistica"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "matplotlib>=3.11.2",
+    "mpmath>=1.4.1",
+    "numba>=0.68.0",
+    "numpy>=2.5.4",
+]

@@ -1,0 +1,551 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-nodecimaldot,es-tabla]{babel}
+\usepackage{lmodern}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\kB}{k_{B}}
+\newcommand{\dd}{\mathrm{d}}
+\newtheorem*{lema}{Lema}
+% Si falta una figura o tabla generada por el código, se muestra un recuadro en su lugar
+\newcommand{\figura}[2][]{\IfFileExists{#2}{\includegraphics[#1]{#2}}%
+  {\fbox{\parbox{0.6\textwidth}{\centering\vspace{2em}Figura pendiente:\\\texttt{\detokenize{#2}}\vspace{2em}}}}}
+\newcommand{\tablaopcional}[1]{\IfFileExists{#1}{\input{#1}}%
+  {\begin{center}\fbox{Tabla pendiente: \texttt{\detokenize{#1}}}\end{center}}}
+
+\title{\textbf{Avance de la semana 12}\\[4pt]
+\large Método de Monte Carlo en el ensamble microcanónico para sistemas discretos:\\
+reproducción de Ray y Frelechoz, \textit{Phys.\ Rev.\ E} \textbf{53}, 3402 (1996)}
+\author{Andrés Felipe Contreras \and Melany Daza Valencia\\[4pt]
+\small Física Estadística e Introducción a la Teoría de la Información --- Universidad EAFIT, 2026-2\\
+\small Profesores: Daniela Angulo y Luis Eduardo Olmos Sánchez}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+Este avance contiene (i) un resumen del artículo de Ray y Frelechoz~\cite{ray96},
+(ii) el planteamiento de su resultado central, (iii) la derivación analítica completa
+de todas las fórmulas del artículo, con los pasos intermedios que el texto omite, y
+(iv) un código preliminar que implementa los métodos de Monte Carlo canónico y
+microcanónico para el modelo de Ising bidimensional, con una prueba de verificación
+interna contra la enumeración exacta de una red $4\times4$ y una primera comparación
+con las Tablas~I--II y las Figuras~1--3 del artículo para la red $30\times30$.
+\end{abstract}
+
+%=====================================================================
+\section{Resumen del artículo}
+%=====================================================================
+
+\paragraph{Problema y contexto.}
+Desde el trabajo de Metropolis \emph{et al.}~\cite{metropolis53}, casi todas las
+simulaciones de Monte Carlo (MC) se hacen en el ensamble canónico: se fija la
+temperatura $T$ y se promedian la energía y sus fluctuaciones. El ensamble
+microcanónico, que describe un sistema aislado y es en ese sentido el más
+fundamental, había sido relegado porque en trabajo analítico es más incómodo.
+Para sistemas con potenciales continuos el ensamble microcanónico se genera con
+dinámica molecular, pero en un sistema discreto (espines, gas de red, aleaciones)
+no hay ecuaciones de movimiento. La alternativa usada hasta entonces era el
+algoritmo del ``demonio'' de Creutz~\cite{creutz83}, muy eficiente, pero que según
+los autores no es un método de Monte Carlo con fundamento riguroso en la mecánica
+estadística y no permite calcular directamente funciones respuesta (calor
+específico, susceptibilidad) mediante fórmulas de fluctuación. En un trabajo
+previo, Ray~\cite{ray91} había propuesto un MC microcanónico para potenciales
+continuos; el artículo extiende ese método a sistemas discretos.
+
+\paragraph{Idea central.}
+A cada espín se le asocia una partícula ficticia de masa muy grande con momento
+$\bm p_i\in\mathbb R^{d}$, de modo que el hamiltoniano total es
+$H(\bm p,s)=K(\bm p)+U(s)$, con $U$ la energía de Ising
+\begin{equation}
+U(s)=-J\sum_{\langle ij\rangle}S_iS_j-B\sum_i S_i ,\qquad S_i=\pm1 .
+\label{eq:U}
+\end{equation}
+La densidad microcanónica es uniforme sobre la superficie $H=E$,
+$W_m(\bm p,s)=D\,\delta(E-H)$. Al integrar sobre los $dN$ momentos se obtiene una
+densidad de probabilidad \emph{sólo sobre las configuraciones de espín}:
+\begin{equation}
+W_E(s)=D'\,\bigl(E-U(s)\bigr)^{dN/2-1}\,\Theta\bigl(E-U(s)\bigr).
+\label{eq:WE}
+\end{equation}
+Esta densidad se muestrea con el algoritmo de Metropolis usual: se propone invertir
+un espín (recorriendo la red en orden) y se acepta con probabilidad
+$\min[1,W_E(s')/W_E(s)]$. La energía cinética promedio define la temperatura,
+$dN\kB T/2=\avg{K}=E-\avg{U}$, y la derivada de $T$ respecto a $E$ da fórmulas de
+fluctuación propias del ensamble microcanónico. Para el calor específico,
+\begin{equation}
+\frac{dN\kB}{2C_B}=\frac{dN}{2}-\Bigl(\frac{dN}{2}-1\Bigr)\avg{K}\avg{\frac1K},
+\label{eq:CB}
+\end{equation}
+donde $C_B=dN\kB/2+C$ incluye la contribución ``gas ideal'' de las partículas
+ficticias y $C$ es el calor específico configuracional. A diferencia del caso
+canónico, $C=(\avg{U^2}-\avg{U}^2)/\kB T^2$, la expresión microcanónica no puede
+escribirse sólo en términos de $U$. Los autores dan también la susceptibilidad a
+energía constante $\chi_E$ y las relaciones que conectan $\chi_E$ con la
+susceptibilidad isotérmica $\chi_T$ en cada ensamble.
+
+\paragraph{Simulaciones.}
+Se estudia el modelo de Ising 2D con $B=0$, $J=\kB=1$ y fronteras periódicas, en una
+red de $30\times30$ espines. En el ensamble canónico se eligen nueve temperaturas
+entre $1.5$ y $3.0$; se equilibra durante al menos $5\times10^6$ barridos y luego se
+hacen cinco corridas independientes de $10^6$ barridos, cuya desviación estándar
+se reporta como incertidumbre. Con el $\avg{U}$ canónico se calcula
+$E=N\kB T+\avg U$ (Ec.~\eqref{eq:E-can} con $d=2$), y esas nueve energías son la
+entrada de las simulaciones microcanónicas, hechas con el mismo protocolo.
+
+\paragraph{Resultados.}
+\begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+\item La curva $E(T)$ (Fig.~1) es prácticamente idéntica en ambos ensambles, como
+se espera de la equivalencia de ensambles (Lebowitz, Percus y Verlet~\cite{lpv67}).
+\item La magnetización media $\avg{|M|}/|M_0|$ (Fig.~4) también coincide.
+\item El calor específico configuracional $c=C/N\kB$ (Figs.~2--3) coincide
+en todo el intervalo \emph{excepto cerca del máximo}: en $T\approx2.30$ el valor
+microcanónico es $c=2.1707\pm0.03$ y el canónico $c=1.8712\pm0.004$, una diferencia
+del 16~\%, muy superior a la diferencia de orden $1/N$ (alrededor de 0.1~\%) esperada por tamaño
+finito.
+\item En una red $60\times60$ el máximo se desplaza a $T\approx2.28$ (hacia el valor
+de Onsager $T_c=2.269$) y los calores específicos son $2.464\pm0.02$ (micro) y
+$2.226\pm0.02$ (canónico): la diferencia baja a 10~\%.
+\end{itemize}
+
+\paragraph{Conclusiones de los autores.}
+El MC microcanónico tiene el mismo costo computacional que el canónico, permite
+calcular cualquier propiedad termodinámica mediante fórmulas de fluctuación, y es
+la única forma de generar el ensamble microcanónico en un sistema discreto. La
+gran diferencia entre ensambles en el calor específico es un precursor de la
+transición de fase del límite termodinámico, y los autores sugieren que podría usarse
+para localizar transiciones de fase en otros sistemas.
+
+\paragraph{Lectura crítica preliminar.}
+El ``ensamble microcanónico'' del artículo es el del sistema compuesto espines $+$
+gas ideal ficticio de $dN$ grados de libertad. Desde el punto de vista de los espines,
+el gas actúa como un baño térmico \emph{finito}, con capacidad calorífica
+$dN\kB/2$ comparable a la de los espines. Por eso las fluctuaciones de $U$ quedan
+suprimidas respecto al caso canónico (Sec.~\ref{sec:equiv}) y la diferencia entre
+ensambles se amplifica justo donde $C$ es grande. El número de grados de libertad
+ficticios, $n=dN/2$, es en realidad un parámetro libre del método: $n=1$ se parece al
+demonio de Creutz y $n\to\infty$ recupera el canónico. El artículo no explora esta
+dependencia; la incluimos como extensión natural del proyecto.
+
+\paragraph{Resultado que se va a reproducir.}
+Las Tablas~I y II y las Figuras~1--3: la curva $E(T)$ y el calor específico $c(T)$
+en ambos ensambles para la red $30\times30$, en particular la diferencia del
+16~\% en el máximo ($T\approx2.30$).
+
+%=====================================================================
+\section{Planteamiento de la derivación central}
+%=====================================================================
+
+Partiendo únicamente de los postulados de los ensambles canónico,
+$W_c(\bm p,s)\propto e^{-H/\kB T}$, y microcanónico, $W_m(\bm p,s)\propto\delta(E-H)$,
+con $H=\sum_{a=1}^{dN}p_a^2/2m+U(s)$ y $U$ dado por~\eqref{eq:U}, se debe demostrar:
+\begin{enumerate}[label=(\alph*),itemsep=1pt]
+\item Ensamble canónico: la densidad de configuraciones $W_T(s)\propto e^{-U/\kB T}$,
+la equipartición $\avg E=dN\kB T/2+\avg U$ y las fórmulas de fluctuación para $C$
+y $\chi_T$ [Ecs.~(2), (4), (6), (7) del artículo].
+\item Ensamble microcanónico: la densidad~\eqref{eq:WE} [Ec.~(9)], que la regla de
+Metropolis con esa densidad la deja invariante, y que la definición
+$dN\kB T/2=\avg K$ [Ec.~(11)] es la temperatura termodinámica.
+\item \textbf{Resultado central:} la fórmula de fluctuación microcanónica del calor
+específico~\eqref{eq:CB} [Ec.~(12)].
+\item La susceptibilidad a energía constante $\chi_E$ [Ec.~(13)] y las relaciones
+entre $\chi_E$ y $\chi_T$ en cada ensamble [Ecs.~(14) y (15)].
+\item Que en el límite termodinámico ambos ensambles dan el mismo $c$, y por qué en
+un sistema finito difieren.
+\end{enumerate}
+
+%=====================================================================
+\section{Derivación analítica}
+%=====================================================================
+
+\paragraph{Notación.}
+$N$ es el número de espines, $d$ la dimensión espacial, $f=dN$ el número de grados de
+libertad de momento y $n=f/2=dN/2$. Escribimos $K=E-U(s)$ para la energía cinética
+en el ensamble microcanónico. Como $U$ depende de $B$ linealmente,
+\begin{equation}
+\frac{\partial U}{\partial B}=-\sum_iS_i\equiv-M,\qquad \frac{\partial M}{\partial B}=0 .
+\label{eq:dUdB}
+\end{equation}
+
+%---------------------------------------------------------------------
+\subsection{Ensamble canónico}
+%---------------------------------------------------------------------
+Como $H$ es separable, la integral sobre momentos se factoriza:
+\begin{equation}
+\int\dd^{f}p\;e^{-\beta\sum_a p_a^2/2m}=\prod_{a=1}^{f}\int_{-\infty}^{\infty}\dd p_a\,
+e^{-\beta p_a^2/2m}=\Bigl(\frac{2\pi m}{\beta}\Bigr)^{f/2},\qquad\beta=\frac1{\kB T},
+\end{equation}
+que no depende de $s$. Por lo tanto la densidad marginal de configuraciones es
+$W_T(s)=A'e^{-\beta U(s)}$ [Ec.~(2)], con $Z=\sum_s e^{-\beta U(s)}$. La energía
+cinética media es
+$\avg K=-\partial_\beta\ln(2\pi m/\beta)^{f/2}=f/2\beta$, de donde
+\begin{equation}
+\avg E=\frac{dN\kB T}{2}+\avg U .
+\label{eq:E-can}
+\end{equation}
+\emph{Calor específico.} Con $\avg U=-\partial_\beta\ln Z$,
+$\partial_\beta\avg U=-(\avg{U^2}-\avg U^2)$ y $\partial_T=-\kB\beta^2\partial_\beta$:
+\begin{equation}
+C\equiv\Bigl(\frac{\partial\avg U}{\partial T}\Bigr)_B=\frac{\avg{U^2}-\avg U^2}{\kB T^2}.
+\label{eq:C-can}
+\end{equation}
+\emph{Susceptibilidad.} Con~\eqref{eq:dUdB}, $\avg M=\beta^{-1}\partial_B\ln Z$, y
+derivando el cociente $\sum_sMe^{-\beta U}/Z$:
+\begin{equation}
+\chi_T\equiv\Bigl(\frac{\partial\avg M}{\partial B}\Bigr)_T=\frac{\avg{M^2}-\avg M^2}{\kB T}.
+\label{eq:chiT}
+\end{equation}
+Necesitaremos además dos derivadas mixtas, que salen del mismo procedimiento:
+\begin{align}
+\Bigl(\frac{\partial\avg M}{\partial T}\Bigr)_B&=\frac{\avg{MU}-\avg M\avg U}{\kB T^2},
+\label{eq:dMdT}\\
+\Bigl(\frac{\partial\avg U}{\partial B}\Bigr)_T&=\Bigl\langle\frac{\partial U}{\partial B}\Bigr\rangle
+-\beta\Bigl(\Bigl\langle U\frac{\partial U}{\partial B}\Bigr\rangle-\avg U\Bigl\langle\frac{\partial U}{\partial B}\Bigr\rangle\Bigr)
+=-\avg M+\frac{\avg{MU}-\avg M\avg U}{\kB T}.
+\label{eq:dUdB-T}
+\end{align}
+
+%---------------------------------------------------------------------
+\subsection{Ensamble microcanónico: densidad de configuraciones}
+%---------------------------------------------------------------------
+Integramos $W_m=D\,\delta(E-K-U)$ sobre los $f$ momentos usando coordenadas
+hiperesféricas, $\dd^fp=S_f\,p^{f-1}\dd p$ con $S_f=2\pi^{f/2}/\Gamma(f/2)$ el área de
+la esfera unitaria en $\mathbb R^f$ y $p=|\bm p|$. Para $E>U$ la delta tiene una
+única raíz positiva $p_*=\sqrt{2m(E-U)}$ y
+$\delta\bigl(E-U-p^2/2m\bigr)=(m/p_*)\,\delta(p-p_*)$. Entonces
+\begin{equation}
+\int\dd^fp\;\delta\Bigl(E-U-\frac{p^2}{2m}\Bigr)=S_f\,m\,p_*^{f-2}
+=S_f\,m\,(2m)^{f/2-1}\,(E-U)^{f/2-1}\,\Theta(E-U),
+\end{equation}
+donde el escalón aparece porque para $E<U$ la delta no tiene raíz ($K\ge0$). Absorbiendo
+las constantes en $D'$ se obtiene~\eqref{eq:WE}:
+$W_E(s)=D'\,K^{\,n-1}\Theta(K)$ con $K=E-U(s)$. Los promedios microcanónicos son
+$\avg A=\sum_sW_E(s)A(s)/\sum_sW_E(s)$.
+
+\paragraph{Regla de aceptación.} La probabilidad de transición
+$P(s\to s')=g(s\to s')\,a(s\to s')$, con propuesta simétrica $g$ (invertir un espín)
+y $a=\min[1,W_E(s')/W_E(s)]$, cumple balance detallado,
+$W_E(s)P(s\to s')=W_E(s')P(s'\to s)=g\,\min[W_E(s),W_E(s')]$, de modo que $W_E$ es
+estacionaria. Recorrer los espines en orden compone pasos que individualmente dejan
+$W_E$ invariante, así que la composición también la deja invariante. Explícitamente,
+si $\Delta U=U(s')-U(s)$,
+\begin{equation}
+a(s\to s')=\min\Bigl[1,\Bigl(1-\frac{\Delta U}{K}\Bigr)^{n-1}\Theta(K-\Delta U)\Bigr]
+\;\xrightarrow{\;n\to\infty\;}\;\min\bigl[1,e^{-\Delta U/\kB T}\bigr],
+\label{eq:acc}
+\end{equation}
+con $\kB T=K/(n-1)$ fijo, lo que muestra que el algoritmo se reduce al Metropolis
+canónico cuando el ``baño'' ficticio es infinito.
+
+%---------------------------------------------------------------------
+\subsection{Temperatura microcanónica}
+%---------------------------------------------------------------------
+Definimos las sumas
+\begin{equation}
+Z_k(E,B)\equiv\sum_s\bigl(E-U(s)\bigr)^k\,\Theta\bigl(E-U(s)\bigr),
+\end{equation}
+de modo que la normalización de $W_E$ es $Z_{n-1}$ y, por ejemplo,
+$\avg K=Z_n/Z_{n-1}$ y $\avg{1/K}=Z_{n-2}/Z_{n-1}$.
+
+\begin{lema}
+Para $k\ge1$, $\partial_EZ_k=k\,Z_{k-1}$ y $\partial_BZ_k=k\sum_sM(s)(E-U)^{k-1}\Theta(E-U)$.
+\end{lema}
+\noindent\emph{Demostración.} Derivando término a término,
+$\partial_E[(E-U)^k\Theta]=k(E-U)^{k-1}\Theta+(E-U)^k\delta(E-U)$, y el segundo término se
+anula porque $(E-U)^k=0$ donde la delta tiene soporte. Para $B$ se usa
+$\partial_B(E-U)=M$ por~\eqref{eq:dUdB}. \hfill$\square$
+
+El volumen de fase encerrado por la superficie $H=E$ es
+$\Phi(E)=\int\dd^fp\sum_s\Theta(E-H)=V_f(2m)^{f/2}Z_n$, con $V_f$ el volumen de la bola
+unitaria en $\mathbb R^f$. Con la entropía de Gibbs $S=\kB\ln\Phi$ y el lema,
+\begin{equation}
+\frac1T=\Bigl(\frac{\partial S}{\partial E}\Bigr)_B=\kB\frac{nZ_{n-1}}{Z_n}
+\quad\Longrightarrow\quad
+\frac{dN}{2}\kB T=\frac{Z_n}{Z_{n-1}}=\avg K ,
+\label{eq:T}
+\end{equation}
+que es exactamente la Ec.~(11) del artículo. Si en cambio se usa la entropía de
+superficie $S=\kB\ln\Omega$ con $\Omega=\partial_E\Phi\propto Z_{n-1}$, se obtiene
+$1/\kB T=(n-1)\avg{1/K}$; ambas definiciones difieren en $O(1/N)$.
+
+%---------------------------------------------------------------------
+\subsection{Resultado central: calor específico microcanónico}
+%---------------------------------------------------------------------
+Derivamos~\eqref{eq:T} respecto a $E$ con el lema:
+\begin{equation}
+\frac{\partial\avg K}{\partial E}
+=\frac{\partial_EZ_n}{Z_{n-1}}-\frac{Z_n\,\partial_EZ_{n-1}}{Z_{n-1}^2}
+=\frac{nZ_{n-1}}{Z_{n-1}}-(n-1)\frac{Z_n}{Z_{n-1}}\frac{Z_{n-2}}{Z_{n-1}}
+=n-(n-1)\avg K\avg{\frac1K}.
+\end{equation}
+Como $\avg K=n\kB T$, la capacidad calorífica total a $B$ constante,
+$1/C_B=(\partial T/\partial E)_B$, satisface
+\begin{equation}
+\boxed{\;\frac{n\kB}{C_B}=n-(n-1)\avg K\avg{\frac1K}\;}\qquad
+\Bigl(n=\frac{dN}{2}\Bigr),
+\label{eq:CB-der}
+\end{equation}
+que es la Ec.~(12) del artículo. Como $E=K+U$ y $K$ es la energía de un gas ideal
+de $f$ grados de libertad, $C_B=n\kB+C$; el calor específico configuracional por
+espín que se compara con el canónico es $c=C/N\kB=(C_B-n\kB)/N\kB$.
+
+Note que por la desigualdad de Jensen, $\avg K\avg{1/K}\ge1$, de modo que el lado
+derecho de~\eqref{eq:CB-der} es $\le1$ y $C_B\ge n\kB$: el estimador garantiza $C\ge0$.
+
+%---------------------------------------------------------------------
+\subsection{Susceptibilidades}
+%---------------------------------------------------------------------
+\emph{A energía constante.} Con $\avg M=\sum_sM(E-U)^{n-1}\Theta/Z_{n-1}$, el lema
+(con $k=n-1$) y $\partial_BM=0$:
+\begin{equation}
+\chi_E\equiv\Bigl(\frac{\partial\avg M}{\partial B}\Bigr)_E
+=(n-1)\frac{\sum_sM^2K^{n-2}\Theta}{Z_{n-1}}-\avg M(n-1)\frac{\sum_sMK^{n-2}\Theta}{Z_{n-1}}
+=\Bigl(\frac{dN}{2}-1\Bigr)\Bigl[\Bigl\langle\frac{M^2}{K}\Bigr\rangle-\avg M\Bigl\langle\frac MK\Bigr\rangle\Bigr],
+\label{eq:chiE}
+\end{equation}
+que es la Ec.~(13). Del mismo modo,
+\begin{equation}
+\Bigl(\frac{\partial\avg M}{\partial E}\Bigr)_B=(n-1)\Bigl[\Bigl\langle\frac MK\Bigr\rangle-\avg M\Bigl\langle\frac1K\Bigr\rangle\Bigr],
+\qquad
+\Bigl(\frac{\partial\avg K}{\partial B}\Bigr)_E=n\avg M-(n-1)\avg K\Bigl\langle\frac MK\Bigr\rangle .
+\label{eq:aux}
+\end{equation}
+\emph{Relación $\chi_T$--$\chi_E$ en el microcanónico.} Viendo $\avg M$ como función de
+$(E,B)$ y luego de $(T,B)$ a través de $E(T,B)$,
+\begin{equation}
+\chi_T=\chi_E+\Bigl(\frac{\partial\avg M}{\partial E}\Bigr)_B\Bigl(\frac{\partial E}{\partial B}\Bigr)_T,
+\qquad
+\Bigl(\frac{\partial E}{\partial B}\Bigr)_T=-\frac{(\partial T/\partial B)_E}{(\partial T/\partial E)_B}
+=-C_B\Bigl(\frac{\partial T}{\partial B}\Bigr)_E ,
+\end{equation}
+donde se usó la regla cíclica. Con $T=\avg K/n\kB$ y~\eqref{eq:aux},
+$(\partial E/\partial B)_T=\frac{2C_B}{dN\kB}\bigl[(\frac{dN}{2}-1)\avg K\avg{M/K}-\frac{dN}{2}\avg M\bigr]$, y por tanto
+\begin{equation}
+\chi_T=\chi_E+\Bigl[\frac{dN}{2}-1\Bigr]\Bigl[\Bigl\langle\frac MK\Bigr\rangle-\avg M\Bigl\langle\frac1K\Bigr\rangle\Bigr]
+\Bigl[\frac{2C_B}{dN\kB}\Bigr]
+\Bigl\{\Bigl[\frac{dN}{2}-1\Bigr]\avg K\Bigl\langle\frac MK\Bigr\rangle-\frac{dN}{2}\avg M\Bigr\},
+\end{equation}
+que es la Ec.~(14).
+
+\emph{Relación $\chi_E$--$\chi_T$ en el canónico.} Ahora $\avg M$ es función de $(T,B)$:
+$\chi_E=\chi_T+(\partial\avg M/\partial T)_B(\partial T/\partial B)_E$, con
+$(\partial T/\partial B)_E=-(\partial E/\partial B)_T/C_B$. De~\eqref{eq:E-can},
+$(\partial E/\partial B)_T$ es igual a $(\partial\avg U/\partial B)_T$, dada por~\eqref{eq:dUdB-T}. Usando~\eqref{eq:dMdT},
+\begin{equation}
+\chi_E=\chi_T-\frac{1}{C_B\kB T^2}\bigl(\avg{MU}-\avg M\avg U\bigr)
+\Bigl[\frac{1}{\kB T}\bigl(\avg{MU}-\avg M\avg U\bigr)-\avg M\Bigr],
+\end{equation}
+que es la Ec.~(15).
+
+%---------------------------------------------------------------------
+\subsection{Equivalencia de ensambles y origen de la diferencia}
+\label{sec:equiv}
+%---------------------------------------------------------------------
+Sea $g(U)$ la densidad de estados de los espines y $S_c(U)=\kB\ln g(U)$. La
+distribución microcanónica de la energía potencial es
+$P_E(U)\propto g(U)(E-U)^{n-1}$. Su máximo $U_*$ cumple
+$S_c'(U_*)/\kB=(n-1)/(E-U_*)\equiv1/\kB T$ y, como $S_c''=\partial_U(1/T)=-1/(T^2C)$,
+\begin{equation}
+\frac{\partial^2\ln P_E}{\partial U^2}\Big|_{U_*}=-\frac{1}{\kB T^2C}-\frac{n-1}{(E-U_*)^2}
+=-\frac{1}{\kB T^2}\Bigl[\frac1C+\frac{1}{(n-1)\kB}\Bigr].
+\end{equation}
+En aproximación gaussiana,
+\begin{equation}
+\avg{\delta U^2}_E\simeq\kB T^2\,\frac{C\,C_K}{C+C_K},\qquad C_K\simeq n\kB=\frac{dN\kB}{2},
+\label{eq:dU2}
+\end{equation}
+es decir, las fluctuaciones de energía están \emph{suprimidas} respecto al valor
+canónico $\kB T^2C$: el gas ficticio es un baño de capacidad finita. Pero al llevar
+$\avg{\delta K^2}=\avg{\delta U^2}$ a~\eqref{eq:CB-der} con
+$\avg K\avg{1/K}\simeq1+\avg{\delta K^2}/\avg K^2$ y $\avg K=n\kB T$:
+\begin{equation}
+\frac{n\kB}{C_B}\simeq1-(n-1)\frac{C}{n\,(n\kB+C)}=\frac{n\kB}{n\kB+C}+O\Bigl(\frac1N\Bigr)
+\quad\Longrightarrow\quad C_B\simeq n\kB+C .
+\end{equation}
+Por tanto la fórmula~\eqref{eq:CB-der} da el mismo $C$ que el ensamble canónico al
+orden dominante: la equivalencia de ensambles se cumple. La diferencia aparece en los
+términos de orden siguiente, que involucran las derivadas $\partial C/\partial T$ y
+$\partial^2C/\partial T^2$ (términos no gaussianos de $P_E$) y que crecen cerca del
+máximo de $C$, donde $C$ varía rápidamente con $T$. Para la semana 15 cuantificaremos
+estos términos y su dependencia en $n$ y en $N$, que es la explicación del
+16~\% observado.
+
+%=====================================================================
+\section{Identificación del ensamble estadístico (preliminar)}
+%=====================================================================
+\begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+\item \textbf{Microestados:} $(\bm p,s)\in\mathbb R^{dN}\times\{-1,+1\}^N$; las
+variables de interés son las $2^N$ configuraciones de espín.
+\item \textbf{Distribución:} uniforme sobre la hipersuperficie $H(\bm p,s)=E$
+(postulado de igual probabilidad a priori); su marginal en $s$ es~\eqref{eq:WE}, que
+\emph{no} es uniforme sobre los estados de espín con $U$ fijo.
+\item \textbf{Restricciones:} $E$, $N$ y $B$ fijos; $K=E-U\ge0$.
+\item \textbf{Equilibrio:} sí; las cadenas de Markov se construyen para que $W_E$ (o
+$W_T$) sea su distribución estacionaria, y las propiedades se miden tras la
+equilibración.
+\item \textbf{Relación con otros ensambles:} $n=1$ da $W_E\propto\Theta(E-U)$, que es
+el ensamble del demonio de Creutz con un solo demonio de energía no negativa; $n\to\infty$
+con $K/n$ fijo da el canónico [Ec.~\eqref{eq:acc}].
+\end{itemize}
+
+%=====================================================================
+\section{Código preliminar}
+%=====================================================================
+El archivo \texttt{codigo/ising\_microcanonico.py} (Python, con \texttt{numba} para
+los ciclos sobre espines) implementa:
+\begin{enumerate}[itemsep=1pt]
+\item \textbf{Metropolis canónico}: barrido secuencial, aceptación
+$\min[1,e^{-\Delta U/T}]$, con $\Delta U=2S_ih_i\in\{0,\pm4,\pm8\}$. Estimador
+de $c$: Ec.~\eqref{eq:C-can}.
+\item \textbf{MC microcanónico}: mismo barrido, aceptación~\eqref{eq:acc} evaluada como
+$\exp[(n-1)\ln(K'/K)]$ para evitar desbordes ($n-1=899$); se parte del estado
+completamente ordenado ($U=-2N<E$). Estimadores: Ecs.~\eqref{eq:T} y~\eqref{eq:CB-der}.
+\item Protocolo del artículo: cinco corridas independientes por punto, con semilla fija;
+la incertidumbre es la desviación estándar entre corridas. Las energías
+microcanónicas son las de entrada de la Tabla~II.
+\end{enumerate}
+
+\paragraph{Prueba de verificación interna (red $4\times4$).}
+Las $2^{16}=65\,536$ configuraciones se enumeran para obtener la densidad de estados
+exacta $g(U)$. Con ella se calculan, sin aproximación,
+$c_{\rm can}(T)$ a partir de~\eqref{eq:C-can} y la curva microcanónica
+$\bigl(T(E),c(E)\bigr)$ a partir de $Z_k(E)=\sum_Ug(U)(E-U)^k\Theta(E-U)$,
+Ecs.~\eqref{eq:T} y~\eqref{eq:CB-der}. Además se verifica que la solución exacta de
+Kaufman para una red finita $m\times n$ con fronteras periódicas~\cite{kaufman49,ferdinand69},
+\begin{gather}
+Z=\tfrac12(2\sinh2K)^{mn/2}\sum_{i=1}^4Z_i,\qquad K=\beta J,\\
+Z_{1,2}=\prod_{r=0}^{n-1}2\left\{\begin{smallmatrix}\cosh\\\sinh\end{smallmatrix}\right\}\Bigl(\tfrac m2\gamma_{2r+1}\Bigr),\quad
+Z_{3,4}=\prod_{r=0}^{n-1}2\left\{\begin{smallmatrix}\cosh\\\sinh\end{smallmatrix}\right\}\Bigl(\tfrac m2\gamma_{2r}\Bigr),\nonumber\\
+\cosh\gamma_l=\cosh2K\coth2K-\cos\frac{\pi l}{n},\qquad\gamma_0=2K+\ln\tanh K,\nonumber
+\end{gather}
+reproduce la enumeración (coinciden $c$ y $U$ a $10^{-10}$), de modo que puede
+usarse como referencia canónica \emph{exacta} para la red $30\times30$ (curva gris
+de la Fig.~\ref{fig:30}).
+
+\begin{figure}[!htbp]
+\centering
+\figura[width=0.62\textwidth]{figuras/verificacion_4x4.pdf}
+\caption{Prueba de verificación: red $4\times4$. Las curvas son exactas (enumeración
+de los $2^{16}$ estados); los puntos son MC con $5\times4\times10^5$ barridos.
+El MC microcanónico reproduce la curva exacta microcanónica, que difiere
+fuertemente de la canónica porque con $N=16$ el baño ficticio es muy pequeño.}
+\label{fig:4x4}
+\end{figure}
+
+%=====================================================================
+\section{Resultados preliminares}
+%=====================================================================
+Con el mismo número de barridos de medición que el artículo ($5\times10^6$ por punto,
+en cinco corridas) pero con una equilibración más corta ($10^5$ barridos), el código
+preliminar reproduce las Tablas~I y II (Tabla~\ref{tab:30} y Figs.~\ref{fig:30}--\ref{fig:E}):
+\begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+\item El calor específico canónico coincide con el del artículo y con el valor exacto
+de Kaufman para la red $30\times30$ dentro de una o dos desviaciones estándar en los
+nueve puntos. La solución exacta confirma de forma independiente la Tabla~I
+(p.\ ej.\ $c_{\rm ex}(2.30)=1.8702$ frente a $1.8712$ del artículo).
+\item El calor específico microcanónico en el máximo da $c=2.171\pm0.022$ en
+$T=2.2997$, igual al $2.1707$ del artículo: la diferencia entre ensambles del
+16~\% se reproduce. La $T$ microcanónica coincide con la Tabla~II en la cuarta
+cifra en ocho de los nueve puntos.
+\item \textbf{Discrepancia abierta en $E=394.08$:} obtenemos $T=2.1019$ y
+$c=0.950\pm0.004$, frente a $T=2.1086$ y $c=0.9713$ en el artículo. Nuestro valor de
+$T$ es consistente con la Tabla~I del propio artículo, donde $E=394.09$ corresponde a
+$T=2.100$; si fuera $T=2.1086$, con $C_B=N(1+c)\approx1.96\times900$ la energía
+tendría que ser unas 15 unidades mayor. Además, en nuestros datos el $c$
+microcanónico queda por debajo del canónico a ambos lados del máximo (como en
+$T=2.0$ y $2.2$), y el valor del artículo rompe ese patrón. Esto sugiere un error en esa
+fila de la Tabla~II, pero antes de afirmarlo hay que descartar una equilibración
+insuficiente (cerca de $T=2.1$ la magnetización se invierte sólo cada varios millones
+de barridos, según los autores) y estimar mejor las barras de error.
+\end{itemize}
+Estas barras de error (desviación estándar de cinco corridas) son en sí mismas
+inciertas; para la entrega final se complementarán con análisis por bloques y
+tiempos de autocorrelación.
+
+\tablaopcional{resultados/tabla_resultados.tex}
+
+\begin{figure}[!htbp]
+\centering
+\figura[width=\textwidth]{figuras/calor_especifico_30x30.pdf}
+\caption{Calor específico configuracional para la red $30\times30$. Símbolos
+rellenos claros: valores de las Tablas~I y II del artículo; símbolos huecos: este
+trabajo ($5\times10^6$ barridos de medición por punto y $10^5$ de equilibración);
+curva gris: solución exacta canónica de Kaufman para $30\times30$.
+Izquierda: compárese con la Fig.~2 del artículo; derecha: Fig.~3.}
+\label{fig:30}
+\end{figure}
+
+\begin{figure}[!htbp]
+\centering
+\figura[width=0.55\textwidth]{figuras/energia_30x30.pdf}
+\caption{Energía total $E$ contra $T$ en ambos ensambles (compárese con la Fig.~1 del
+artículo).}
+\label{fig:E}
+\end{figure}
+
+%=====================================================================
+\section{Plan hacia la entrega final (semana 15)}
+%=====================================================================
+\begin{enumerate}[itemsep=1pt]
+\item Convertir el script en un cuaderno Jupyter reproducible de principio a fin.
+\item Estudiar la convergencia: autocorrelación integrada de $U$ y $K$ cerca de
+$T\approx2.3$, número de barridos de equilibración y estimación del error por bloques,
+además de la desviación entre corridas.
+\item Barrido fino en $2.20\le T\le2.40$ para reproducir la Fig.~3 completa, y la red
+$60\times60$ en $T\approx2.28$.
+\item Cuantificar la diferencia entre ensambles con la expansión de la
+Sec.~\ref{sec:equiv} y estudiar su dependencia en $n$ (número de grados de libertad
+ficticios) y en $N$.
+\item Posible extensión: densidad de estados exacta de la red finita~\cite{beale96}
+para obtener también el $c$ microcanónico exacto de la red $30\times30$.
+\end{enumerate}
+
+%=====================================================================
+\appendix
+\section*{Anexo: registro preliminar de uso de asistentes de IA}
+%=====================================================================
+\begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+\item \textbf{Qué se pidió:} a Claude (Anthropic) se le pidió un borrador en \LaTeX{}
+de este avance y un código preliminar a partir del artículo y del enunciado del
+proyecto.
+\item \textbf{Qué produjo:} este documento, las derivaciones de la Sec.~3 y el script
+\texttt{ising\_microcanonico.py}.
+\item \textbf{Cómo se verificó:} el código incluye la comparación con la enumeración
+exacta $4\times4$ y con la solución de Kaufman; las derivaciones reproducen las
+Ecs.~(9) y (11)--(15) del artículo.
+\item \textbf{Pendiente por el grupo:} rehacer a mano cada derivación, revisar
+cada línea del código y registrar aquí los errores que se encuentren y cómo se
+detectaron.
+\end{itemize}
+
+\begin{thebibliography}{9}
+\bibitem{ray96} J.~R.~Ray y C.~Frelechoz, ``Microcanonical ensemble Monte Carlo method
+for discrete systems'', \textit{Phys.\ Rev.\ E} \textbf{53}, 3402 (1996).
+\bibitem{ray91} J.~R.~Ray, \textit{Phys.\ Rev.\ A} \textbf{44}, 4061 (1991).
+\bibitem{metropolis53} N.~Metropolis, A.~Rosenbluth, M.~Rosenbluth, A.~Teller y
+E.~Teller, \textit{J.\ Chem.\ Phys.} \textbf{21}, 1087 (1953).
+\bibitem{creutz83} M.~Creutz, ``Microcanonical Monte Carlo simulation'',
+\textit{Phys.\ Rev.\ Lett.} \textbf{50}, 1411 (1983).
+\bibitem{lpv67} J.~L.~Lebowitz, J.~K.~Percus y L.~Verlet, \textit{Phys.\ Rev.}
+\textbf{153}, 250 (1967).
+\bibitem{kaufman49} B.~Kaufman, ``Crystal statistics. II. Partition function evaluated
+by spinor analysis'', \textit{Phys.\ Rev.} \textbf{76}, 1232 (1949).
+\bibitem{ferdinand69} A.~E.~Ferdinand y M.~E.~Fisher, ``Bounded and inhomogeneous Ising
+models. I. Specific-heat anomaly of a finite lattice'', \textit{Phys.\ Rev.}
+\textbf{185}, 832 (1969).
+\bibitem{beale96} P.~D.~Beale, ``Exact distribution of energies in the two-dimensional
+Ising model'', \textit{Phys.\ Rev.\ Lett.} \textbf{76}, 78 (1996).
+\end{thebibliography}
+
+\end{document}
