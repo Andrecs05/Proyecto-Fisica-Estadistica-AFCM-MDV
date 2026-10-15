@@ -175,41 +175,53 @@ un sistema finito difieren.
 
 $N$ es el número de espines, $d$ la dimensión espacial, $f=dN$ el número de grados de
 libertad de momento y $n=f/2=dN/2$. Escribimos $K=E-U(s)$ para la energía cinética
-en el ensamble microcanónico. Como $U$ depende de $B$ linealmente,
+en el ensamble microcanónico. Como $U$ depende de $B$ linealmente\eqref{eq:U}:
 \begin{equation}
-\frac{\partial U}{\partial B}=-\sum_iS_i\equiv-M,\qquad \frac{\partial M}{\partial B}=0 .
+\frac{\partial U}{\partial B}=-\sum_iS_i\equiv-M,\qquad \frac{\partial M}{\partial B}=0 ,
 \label{eq:dUdB}
 \end{equation}
+
+donde $M$ es la magnetización total. 
 
 %---------------------------------------------------------------------
 \subsection{Ensamble canónico}
 %---------------------------------------------------------------------
-Como $H$ es separable, la integral sobre momentos se factoriza:
+Como $H$ es separable, la integral sobre momentos se factoriza con $K=\sum_a p_a^2/2m$:
 \begin{equation}
 \int\dd^{f}p\;e^{-\beta\sum_a p_a^2/2m}=\prod_{a=1}^{f}\int_{-\infty}^{\infty}\dd p_a\,
 e^{-\beta p_a^2/2m}=\Bigl(\frac{2\pi m}{\beta}\Bigr)^{f/2},\qquad\beta=\frac1{\kB T},
 \end{equation}
-que no depende de $s$. Por lo tanto la densidad marginal de configuraciones es
-$W_T(s)=A'e^{-\beta U(s)}$ [Ec.~(2)], con $Z=\sum_s e^{-\beta U(s)}$. La energía
+que no depende de $s$. Por lo tanto se absorbe en la constante de normalización $A'$, y la densidad marginal de configuraciones es
+$W_T(s)=A'e^{-\beta U(s)}$ [Ec.~(2)], con la función de partición
+$Z=\sum_s e^{-\beta U(s)}$. La energía
 cinética media es
 $\avg K=-\partial_\beta\ln(2\pi m/\beta)^{f/2}=f/2\beta$, de donde
 \begin{equation}
 \avg E=\frac{dN\kB T}{2}+\avg U .
 \label{eq:E-can}
 \end{equation}
-\emph{Calor específico.} Con $\avg U=-\partial_\beta\ln Z$,
-$\partial_\beta\avg U=-(\avg{U^2}-\avg U^2)$ y $\partial_T=-\kB\beta^2\partial_\beta$:
+\textbf{Calor específico.} A $B$ fijo, $T$ sólo entra por $\beta=1/\kB T$. De
+$\partial_\beta Z=-\sum_sUe^{-\beta U}=-Z\avg U$ se obtiene $\avg U=-\partial_\beta\ln Z$, y
+derivando $\avg U=\sum_sUe^{-\beta U}/Z$ con la regla del cociente, se obtiene la expresión
+$\partial_\beta\avg U=-\avg{U^2}+\avg U^2$. Con $\partial_T=(\dd\beta/\dd T)\partial_\beta=-\kB\beta^2\partial_\beta$:
 \begin{equation}
-C\equiv\Bigl(\frac{\partial\avg U}{\partial T}\Bigr)_B=\frac{\avg{U^2}-\avg U^2}{\kB T^2}.
+C\equiv\Bigl(\frac{\partial\avg U}{\partial T}\Bigr)_B
+=\kB\beta^2\bigl(\avg{U^2}-\avg U^2\bigr)
+=\frac{\avg{U^2}-\avg U^2}{\kB T^2}.
 \label{eq:C-can}
 \end{equation}
-\emph{Susceptibilidad.} Con~\eqref{eq:dUdB}, $\avg M=\beta^{-1}\partial_B\ln Z$, y
+Es la capacidad calorífica configuracional (la parte cinética aporta $dN\kB/2$ por
+separado). En el código, con $J=\kB=1$, $c=\mathrm{Var}(U)/NT^2$.
+
+\vspace{0.5cm}
+\noindent
+\textbf{Susceptibilidad.} Con~\eqref{eq:dUdB}, $\avg M=\beta^{-1}\partial_B\ln Z$, y
 derivando el cociente $\sum_sMe^{-\beta U}/Z$:
 \begin{equation}
 \chi_T\equiv\Bigl(\frac{\partial\avg M}{\partial B}\Bigr)_T=\frac{\avg{M^2}-\avg M^2}{\kB T}.
 \label{eq:chiT}
 \end{equation}
-Necesitaremos además dos derivadas mixtas, que salen del mismo procedimiento:
+Necesitaremos además dos derivadas mixtas para las relaciones entre $\chi_E$ y $\chi_T$, que salen del mismo procedimiento:
 \begin{align}
 \Bigl(\frac{\partial\avg M}{\partial T}\Bigr)_B&=\frac{\avg{MU}-\avg M\avg U}{\kB T^2},
 \label{eq:dMdT}\\
