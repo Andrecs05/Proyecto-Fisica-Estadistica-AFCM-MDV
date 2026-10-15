@@ -33,16 +33,16 @@ reproducción de Ray y Frelechoz, \textit{Phys.\ Rev.\ E} \textbf{53}, 3402 (199
 \begin{document}
 \maketitle
 
-\begin{abstract}
-\noindent
-Este avance contiene (i) un resumen del artículo de Ray y Frelechoz~\cite{ray96},
-(ii) el planteamiento de su resultado central, (iii) la derivación analítica completa
-de todas las fórmulas del artículo, con los pasos intermedios que el texto omite, y
-(iv) un código preliminar que implementa los métodos de Monte Carlo canónico y
-microcanónico para el modelo de Ising bidimensional, con una prueba de verificación
-interna contra la enumeración exacta de una red $4\times4$ y una primera comparación
-con las Tablas~I--II y las Figuras~1--3 del artículo para la red $30\times30$.
-\end{abstract}
+% \begin{abstract}
+% \noindent
+% Este avance contiene (i) un resumen del artículo de Ray y Frelechoz~\cite{ray96},
+% (ii) el planteamiento de su resultado central, (iii) la derivación analítica completa
+% de todas las fórmulas del artículo, con los pasos intermedios que el texto omite, y
+% (iv) un código preliminar que implementa los métodos de Monte Carlo canónico y
+% microcanónico para el modelo de Ising bidimensional, con una prueba de verificación
+% interna contra la enumeración exacta de una red $4\times4$ y una primera comparación
+% con las Tablas~I--II y las Figuras~1--3 del artículo para la red $30\times30$.
+% \end{abstract}
 
 %=====================================================================
 \section{Resumen del artículo}
@@ -50,19 +50,19 @@ con las Tablas~I--II y las Figuras~1--3 del artículo para la red $30\times30$.
 
 \paragraph{Problema y contexto.}
 Desde el trabajo de Metropolis \emph{et al.}~\cite{metropolis53}, casi todas las
-simulaciones de Monte Carlo (MC) se hacen en el ensamble canónico: se fija la
-temperatura $T$ y se promedian la energía y sus fluctuaciones. El ensamble
+simulaciones de Monte Carlo (MC) se hacen en el ensamble canónico, finjando la
+temperatura $T$ y promediando la energía y sus fluctuaciones. El ensamble
 microcanónico, que describe un sistema aislado y es en ese sentido el más
-fundamental, había sido relegado porque en trabajo analítico es más incómodo.
+fundamental, se ha utilizado de forma más limitada porque en trabajo analítico es más incómodo.
 Para sistemas con potenciales continuos el ensamble microcanónico se genera con
 dinámica molecular, pero en un sistema discreto (espines, gas de red, aleaciones)
 no hay ecuaciones de movimiento. La alternativa usada hasta entonces era el
 algoritmo del ``demonio'' de Creutz~\cite{creutz83}, muy eficiente, pero que según
-los autores no es un método de Monte Carlo con fundamento riguroso en la mecánica
-estadística y no permite calcular directamente funciones respuesta (calor
-específico, susceptibilidad) mediante fórmulas de fluctuación. En un trabajo
+los autores no es un método de MC con fundamento riguroso en la mecánica
+estadística y no permite calcular directamente funciones respuesta como el calor
+específico y la susceptibilidad mediante fórmulas de fluctuación. En un trabajo
 previo, Ray~\cite{ray91} había propuesto un MC microcanónico para potenciales
-continuos; el artículo extiende ese método a sistemas discretos.
+continuos, el artículo extiende ese método a sistemas discretos.
 
 \paragraph{Idea central.}
 A cada espín se le asocia una partícula ficticia de masa muy grande con momento
@@ -74,14 +74,14 @@ U(s)=-J\sum_{\langle ij\rangle}S_iS_j-B\sum_i S_i ,\qquad S_i=\pm1 .
 \end{equation}
 La densidad microcanónica es uniforme sobre la superficie $H=E$,
 $W_m(\bm p,s)=D\,\delta(E-H)$. Al integrar sobre los $dN$ momentos se obtiene una
-densidad de probabilidad \emph{sólo sobre las configuraciones de espín}:
+densidad de probabilidad sobre las configuraciones de espín:
 \begin{equation}
-W_E(s)=D'\,\bigl(E-U(s)\bigr)^{dN/2-1}\,\Theta\bigl(E-U(s)\bigr).
+W_E(s)=D'\,\bigl(E-U(s)\bigr)^{dN/2-1}\,\Theta\bigl(E-U(s)\bigr),
 \label{eq:WE}
 \end{equation}
-Esta densidad se muestrea con el algoritmo de Metropolis usual: se propone invertir
-un espín (recorriendo la red en orden) y se acepta con probabilidad
-$\min[1,W_E(s')/W_E(s)]$. La energía cinética promedio define la temperatura,
+donde $\Theta$ es una función escalón y $D'$ es una constante. Esta densidad se muestrea con el algoritmo de Metropolis, se propone invertir
+un espín recorriendo la red en orden y se acepta con probabilidad
+$\min[1,\,W_E(s')/W_E(s)]$. La energía cinética promedio define la temperatura,
 $dN\kB T/2=\avg{K}=E-\avg{U}$, y la derivada de $T$ respecto a $E$ da fórmulas de
 fluctuación propias del ensamble microcanónico. Para el calor específico,
 \begin{equation}
@@ -91,13 +91,17 @@ fluctuación propias del ensamble microcanónico. Para el calor específico,
 donde $C_B=dN\kB/2+C$ incluye la contribución ``gas ideal'' de las partículas
 ficticias y $C$ es el calor específico configuracional. A diferencia del caso
 canónico, $C=(\avg{U^2}-\avg{U}^2)/\kB T^2$, la expresión microcanónica no puede
-escribirse sólo en términos de $U$. Los autores dan también la susceptibilidad a
-energía constante $\chi_E$ y las relaciones que conectan $\chi_E$ con la
-susceptibilidad isotérmica $\chi_T$ en cada ensamble.
+escribirse sólo en términos de $U$. También se dan expresiones para
+la susceptibilidad a energía constante $\chi_E$ y las relaciones que conectan $\chi_E$ con la
+susceptibilidad isotérmica $\chi_T$ del ensamble canónico a partir de cantidades evaluadas en el ensamble microcanónico.
 
 \paragraph{Simulaciones.}
-Se estudia el modelo de Ising 2D con $B=0$, $J=\kB=1$ y fronteras periódicas, en una
-red de $30\times30$ espines. En el ensamble canónico se eligen nueve temperaturas
+Se estudia el modelo de Ising bidimensional en una red cuadrada de
+$N = 30\times30$ espines $S_i=\pm1$, con condiciones de frontera periódicas y
+sin campo externo ($B=0$), de modo que la energía potencial es
+$U(s) = -J\sum_{\langle ij\rangle} S_i S_j$. Se trabaja en unidades
+$J = \kB = 1$, por lo que $T$ se mide en unidades de $J/\kB$ y el calor
+específico por espín es $c = C/N$. En el ensamble canónico se eligen nueve temperaturas
 entre $1.5$ y $3.0$; se equilibra durante al menos $5\times10^6$ barridos y luego se
 hacen cinco corridas independientes de $10^6$ barridos, cuya desviación estándar
 se reporta como incertidumbre. Con el $\avg{U}$ canónico se calcula
@@ -110,7 +114,7 @@ entrada de las simulaciones microcanónicas, hechas con el mismo protocolo.
 se espera de la equivalencia de ensambles (Lebowitz, Percus y Verlet~\cite{lpv67}).
 \item La magnetización media $\avg{|M|}/|M_0|$ (Fig.~4) también coincide.
 \item El calor específico configuracional $c=C/N\kB$ (Figs.~2--3) coincide
-en todo el intervalo \emph{excepto cerca del máximo}: en $T\approx2.30$ el valor
+en todo el intervalo excepto cerca del máximo: en $T\approx2.30$ el valor
 microcanónico es $c=2.1707\pm0.03$ y el canónico $c=1.8712\pm0.004$, una diferencia
 del 16~\%, muy superior a la diferencia de orden $1/N$ (alrededor de 0.1~\%) esperada por tamaño
 finito.
@@ -119,32 +123,32 @@ de Onsager $T_c=2.269$) y los calores específicos son $2.464\pm0.02$ (micro) y
 $2.226\pm0.02$ (canónico): la diferencia baja a 10~\%.
 \end{itemize}
 
-\paragraph{Conclusiones de los autores.}
+\paragraph{Conclusiones.}
 El MC microcanónico tiene el mismo costo computacional que el canónico, permite
 calcular cualquier propiedad termodinámica mediante fórmulas de fluctuación, y es
 la única forma de generar el ensamble microcanónico en un sistema discreto. La
 gran diferencia entre ensambles en el calor específico es un precursor de la
-transición de fase del límite termodinámico, y los autores sugieren que podría usarse
+transición de fase del límite termodinámico, y se sugiere que podría usarse
 para localizar transiciones de fase en otros sistemas.
 
-\paragraph{Lectura crítica preliminar.}
-El ``ensamble microcanónico'' del artículo es el del sistema compuesto espines $+$
-gas ideal ficticio de $dN$ grados de libertad. Desde el punto de vista de los espines,
-el gas actúa como un baño térmico \emph{finito}, con capacidad calorífica
-$dN\kB/2$ comparable a la de los espines. Por eso las fluctuaciones de $U$ quedan
-suprimidas respecto al caso canónico (Sec.~\ref{sec:equiv}) y la diferencia entre
-ensambles se amplifica justo donde $C$ es grande. El número de grados de libertad
-ficticios, $n=dN/2$, es en realidad un parámetro libre del método: $n=1$ se parece al
-demonio de Creutz y $n\to\infty$ recupera el canónico. El artículo no explora esta
-dependencia; la incluimos como extensión natural del proyecto.
+% \paragraph{Lectura crítica preliminar.}
+% El ``ensamble microcanónico'' del artículo es el del sistema compuesto espines $+$
+% gas ideal ficticio de $dN$ grados de libertad. Desde el punto de vista de los espines,
+% el gas actúa como un baño térmico \emph{finito}, con capacidad calorífica
+% $dN\kB/2$ comparable a la de los espines. Por eso las fluctuaciones de $U$ quedan
+% suprimidas respecto al caso canónico (Sec.~\ref{sec:equiv}) y la diferencia entre
+% ensambles se amplifica justo donde $C$ es grande. El número de grados de libertad
+% ficticios, $n=dN/2$, es en realidad un parámetro libre del método: $n=1$ se parece al
+% demonio de Creutz y $n\to\infty$ recupera el canónico. El artículo no explora esta
+% dependencia; la incluimos como extensión natural del proyecto.  
 
 \paragraph{Resultado que se va a reproducir.}
-Las Tablas~I y II y las Figuras~1--3: la curva $E(T)$ y el calor específico $c(T)$
+Las Tablas~I y II y las Figuras~1--4: la curva $E(T)$ y el calor específico $c(T)$
 en ambos ensambles para la red $30\times30$, en particular la diferencia del
 16~\% en el máximo ($T\approx2.30$).
 
 %=====================================================================
-\section{Planteamiento de la derivación central}
+\section{Derivación analítica}
 %=====================================================================
 
 Partiendo únicamente de los postulados de los ensambles canónico,
@@ -157,8 +161,8 @@ y $\chi_T$ [Ecs.~(2), (4), (6), (7) del artículo].
 \item Ensamble microcanónico: la densidad~\eqref{eq:WE} [Ec.~(9)], que la regla de
 Metropolis con esa densidad la deja invariante, y que la definición
 $dN\kB T/2=\avg K$ [Ec.~(11)] es la temperatura termodinámica.
-\item \textbf{Resultado central:} la fórmula de fluctuación microcanónica del calor
-específico~\eqref{eq:CB} [Ec.~(12)].
+\item La fórmula de fluctuación microcanónica del calor
+específico~\eqref{eq:CB} a utiliazar en las simulaciones [Ec.~(12)].
 \item La susceptibilidad a energía constante $\chi_E$ [Ec.~(13)] y las relaciones
 entre $\chi_E$ y $\chi_T$ en cada ensamble [Ecs.~(14) y (15)].
 \item Que en el límite termodinámico ambos ensambles dan el mismo $c$, y por qué en
@@ -169,7 +173,6 @@ un sistema finito difieren.
 \section{Derivación analítica}
 %=====================================================================
 
-\paragraph{Notación.}
 $N$ es el número de espines, $d$ la dimensión espacial, $f=dN$ el número de grados de
 libertad de momento y $n=f/2=dN/2$. Escribimos $K=E-U(s)$ para la energía cinética
 en el ensamble microcanónico. Como $U$ depende de $B$ linealmente,

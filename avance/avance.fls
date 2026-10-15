@@ -1,6 +1,6 @@
-PWD C:\Users\andre\iCloudDrive\Uni\Semestre 7\Física Estadística\avance
+PWD c:\Users\andre\iCloudDrive\Uni\Semestre 7\Fisica Estadistica\avance
 INPUT C:\Users\andre\AppData\Local\MiKTeX\miktex\data\le\pdftex\pdflatex.fmt
-INPUT avance.tex
+INPUT c:\Users\andre\iCloudDrive\Uni\Semestre 7\Fisica Estadistica\avance\avance.tex
 OUTPUT avance.log
 INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\tex\latex\base\article.cls
 INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\tex\latex\base\article.cls
@@ -201,31 +201,6 @@ INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\lmbsy10.t
 INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\lmbsy10.tfm
 INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\lmbsy7.tfm
 INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\ec-lmr10.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\ec-lmbx10.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\rm-lmr10.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\rm-lmr7.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\rm-lmr5.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\lmmi10.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\lmmi7.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\lmmi5.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\lmsy10.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\lmsy7.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\lmsy5.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msam10.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msam7.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msam5.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm10.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm7.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm5.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\rm-lmbx10.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\rm-lmbx7.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\rm-lmbx5.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\lmmib10.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\lmmib7.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\lmmib5.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\lmbsy10.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\lmbsy7.tfm
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\lmbsy5.tfm
 INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\ec-lmr12.tfm
 INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\ec-lmbx12.tfm
 INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\ec-lmbx10.tfm
@@ -240,9 +215,9 @@ INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\lmmib10.t
 INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\lmbsy10.tfm
 INPUT C:\Users\andre\AppData\Local\MiKTeX\fonts\map\pdftex\pdftex.map
 INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\enc\dvips\lm\lm-ec.enc
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\enc\dvips\lm\lm-rm.enc
-INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\enc\dvips\lm\lm-mathsy.enc
 INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\enc\dvips\lm\lm-mathit.enc
+INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\enc\dvips\lm\lm-mathsy.enc
+INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\enc\dvips\lm\lm-rm.enc
 INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\fonts\enc\dvips\lm\lm-mathex.enc
 INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\tex\latex\lm\t1lmtt.fd
 INPUT C:\Users\andre\AppData\Local\Programs\MiKTeX\tex\latex\lm\t1lmtt.fd
