@@ -249,9 +249,9 @@ $W_E(s)=D'\,K^{\,n-1}\Theta(K)$ con $K=E-U(s)$. Los promedios microcanónicos so
 $\avg A=\sum_sW_E(s)A(s)/\sum_sW_E(s)$.
 
 \paragraph{Regla de aceptación.} La probabilidad de transición
-$P(s\to s')=g(s\to s')\,a(s\to s')$, con propuesta simétrica $g$ (invertir un espín)
-y $a=\min[1,W_E(s')/W_E(s)]$, cumple balance detallado,
-$W_E(s)P(s\to s')=W_E(s')P(s'\to s)=g\,\min[W_E(s),W_E(s')]$, de modo que $W_E$ es
+$P(s\to s')=g(s\to s')\,a(s\to s')$, con probabilidad de la propuesta $g$ (invertir un espín)
+y probabilidad de aceptarla $a=\min[1,W_E(s')/W_E(s)]$. Ya que la propuesta es simétrica, $g(s\to s') = g(s'\to s)$, (invertir el mismo espín te devuelve a $s$) se cumple el balance detallado,
+$W_E(s)P(s\to s')=W_E(s')P(s'\to s)=g\,\min[W_E(s),\,W_E(s')]$, de modo que $W_E$ es
 estacionaria. Recorrer los espines en orden compone pasos que individualmente dejan
 $W_E$ invariante, así que la composición también la deja invariante. Explícitamente,
 si $\Delta U=U(s')-U(s)$,
